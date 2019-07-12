@@ -9,6 +9,7 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
+use yii\helpers\Url;
 
 AppAsset::register($this);
 ?>
@@ -44,9 +45,11 @@ AppAsset::register($this);
                 ['label' => 'Войти', 'url' => ['/site/login']]
             ) : (
                 '<li>'
+                . Html::a(Yii::$app->user->identity->email, Url::to(['/site/profile', 'id' => Yii::$app->user->identity->getId()]))
+                . '<li>'
                 . Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(
-                    'Выйти (' . Yii::$app->user->identity->email . ')',
+                    'Выйти',
                     ['class' => 'btn btn-link logout']
                 )
                 . Html::endForm()

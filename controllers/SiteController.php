@@ -82,11 +82,15 @@ class SiteController extends \app\controllers\AppController
 
         if (isset($_POST['Signup'])){
             $model->attributes = Yii::$app->request->post('Signup');
+//            debug($_POST['Signup']);
+//            die();
         }
 
         if ($model->validate() && $model->signup()){
-//            return $this->goHome();
-            return $this->actionLogin();
+            return $this->goHome();
+//            $model->delete();
+//            unset($_POST['Signup']);
+//            return $this->actionLogin();
         }
 
         return $this->render('signup', ['model' => $model]);
@@ -114,12 +118,22 @@ class SiteController extends \app\controllers\AppController
 
         if (isset($_POST['UserTable'])){
 
-            $model = Yii::$app->request->post('UserTable');
+//            debug($_POST['UserTable']);
+//            debug(Yii::$app->request->post('UserTable'));
+//            $model->attributes = Yii::$app->request->post('UserTable');
+//            $model->load(Yii::$app->request->post(), '');
+
+//            $model = Yii::$app->request->post('UserTable');
+//            $model->attributes = Yii::$app->request->post('UserTable');
+            $model->attributes = Yii::$app->request->post('UserTable');
+
+//            debug($model);
+//            die();
+
+//            $model->attributes = Yii::$app->request->post('UserTable');
+//            $model->attributes = $_POST['UserTable'];
 
             //var_dump($_POST['UserTable']);
-            var_dump($model->name);
-            die();
-
 
             $model->saveUserData();
         }
