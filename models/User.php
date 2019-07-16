@@ -23,9 +23,7 @@ use Yii;
  */
 class User extends \yii\db\ActiveRecord
 {
-    /**
-     * {@inheritdoc}
-     */
+
     public static function tableName()
     {
         return 'user';
@@ -38,7 +36,8 @@ class User extends \yii\db\ActiveRecord
     {
         return [
             [['email', 'password', 'date'], 'required'],
-            [['email', 'password', 'name', 'avatar', 'city', 'about', 'phone'], 'string'],
+            [['email', 'password', 'name', 'city', 'about', 'phone'], 'string'],
+            [['avatar'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
             [['date'], 'safe'],
             [['auth_key', 'access_token'], 'string', 'max' => 32],
         ];
@@ -69,6 +68,6 @@ class User extends \yii\db\ActiveRecord
      */
     public function getAds()
     {
-        return $this->hasMany(Ad::className(), ['userId' => 'id']);
+        return $this->hasMany(AdTable::className(), ['userId' => 'id']);
     }
 }

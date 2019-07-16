@@ -9,6 +9,9 @@ use app\models\AdTable;
 use app\models\UserTable;
 use app\models\Signup;
 use app\models\LoginForm;
+use yii\web\UploadedFile;
+use yii\helpers\BaseFileHelper;
+use app\models\User;
 
 class SiteController extends \app\controllers\AppController
 {
@@ -118,24 +121,29 @@ class SiteController extends \app\controllers\AppController
 
         if (isset($_POST['UserTable'])){
 
-//            debug($_POST['UserTable']);
-//            debug(Yii::$app->request->post('UserTable'));
-//            $model->attributes = Yii::$app->request->post('UserTable');
-//            $model->load(Yii::$app->request->post(), '');
 
-//            $model = Yii::$app->request->post('UserTable');
-//            $model->attributes = Yii::$app->request->post('UserTable');
             $model->attributes = Yii::$app->request->post('UserTable');
+            $model->avatar = UploadedFile::getInstance($model, 'avatar');
 
-//            debug($model);
+//            debug($model->avatar);
 //            die();
 
-//            $model->attributes = Yii::$app->request->post('UserTable');
-//            $model->attributes = $_POST['UserTable'];
+            if ($model->avatar){
 
-            //var_dump($_POST['UserTable']);
+//                BaseFileHelper::createDirectory('uploads/');
+//                $avatarPath = 'uploads/' . $model->avatar->baseName . '.' . $model->avatar->extension;
+
+//                $randString = implode(array_slice(array_merge(range(0,9), range('a','z'), range('A','Z')), 0, 10));
+                $randString = Yii::$app->security->generateRandomString(10);
+                $avatarFile = $loginInfo['id'] . '-avatar-' . $randString . '.jpg';
+                $avatarPath = 'uploads/' . $avatarFile;
+                $model->avatar->saveAs($avatarPath);
+                $model->avatar = $avatarFile;
+
+            }
 
             $model->saveUserData();
+
         }
 
         $userId = Yii::$app->request->get('id');

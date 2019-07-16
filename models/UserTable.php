@@ -17,7 +17,8 @@ class UserTable extends User
         $user = new User();
 
 //        debug($this);
-//        $user = Post::model()->findByPk(10);
+//        die();
+        //        $user = Post::model()->findByPk(10);
 
         $user = UserTable::findOne([ 'id' => Yii::$app->user->identity->getId() ]);
 
@@ -25,6 +26,16 @@ class UserTable extends User
         $user->city = $this->city;
         $user->phone = $this->phone;
         $user->about = $this->about;
+
+        if (file_exists('uploads/' . $user->avatar)){
+            unlink('uploads/' . $user->avatar);
+        }
+
+        $user->avatar = $this->avatar;
+//        $user->avatar = $this->avatar->name;
+//
+//        debug($user);
+//        die();
 
         return $user->save();
     }
