@@ -40,11 +40,12 @@ AppAsset::register($this);
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
             ['label' => 'Главная', 'url' => ['/site/index']],
-            ['label' => 'Объявление (удалить)', 'url' => ['/site/ad']],
             Yii::$app->user->isGuest ? (
                 ['label' => 'Войти', 'url' => ['/site/login']]
             ) : (
                 '<li>'
+                . Html::a('Создать', Url::to(['/site/create']))
+                . '<li>'
                 . Html::a(Yii::$app->user->identity->email, Url::to(['/site/profile', 'id' => Yii::$app->user->identity->getId()]))
                 . '<li>'
                 . Html::beginForm(['/site/logout'], 'post')

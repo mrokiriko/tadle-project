@@ -44,7 +44,7 @@ use yii\helpers\Html;
 
 
         if (isset($userData['avatar'])){
-            echo Html::img('uploads/' . $userData['id'] . '-avatar.jpg', ['alt' => 'yo, its my avatar', 'width' => 200]);
+            echo Html::img('uploads/' . $userData['avatar'], ['alt' => 'yo, its my avatar', 'width' => 200]);
         }
 //        echo Html::img('uploads/' . $userData['avatar'], ['alt' => 'yo, its my avatar', 'width' => 200]);
 

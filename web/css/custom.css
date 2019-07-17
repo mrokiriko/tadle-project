@@ -1,0 +1,11 @@
+div.index-ad {
+    background: #dee6cc;
+    border-radius: 15px;
+    transition: 0.25s;
+    padding: 5px;
+}
+div.index-ad:hover {
+    transition: 0.25s;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2); /* Параметры тени */
+
+}

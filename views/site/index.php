@@ -1,52 +1,67 @@
 <?php
 
-/* @var $this yii\web\View */
 
-$this->title = 'My Yii Application';
+use yii\helpers\Html;
+use yii\helpers\Url;
+
+$this->title = 'TADLE - the future of public advertisement';
+
 ?>
+
 <div class="site-index">
-
-    <div class="jumbotron">
-        <h1>Congratulations!</h1>
-
-        <p class="lead">You have successfully created your Yii-powered application.</p>
-
-        <p><a class="btn btn-lg btn-success" href="http://www.yiiframework.com">Get started with Yii</a></p>
-    </div>
 
     <div class="body-content">
 
         <div class="row">
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+            <?php
+//            foreach($ads as $ad){
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
 
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/doc/">Yii Documentation &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+            foreach($models as $ad){
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+//                debug($ad);
+//                die();
 
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/forum/">Yii Forum &raquo;</a></p>
-            </div>
-            <div class="col-lg-4">
-                <h2>Heading</h2>
+//                    echo "<div class='col-lg-4'>";
+//                    echo "</div>";
 
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                    dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                    ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                    fugiat nulla pariatur.</p>
+                    echo Html::beginTag('a', ['href' => \yii\helpers\Url::to(['site/ad', 'id' => $ad->id])]);
 
-                <p><a class="btn btn-default" href="http://www.yiiframework.com/extensions/">Yii Extensions &raquo;</a></p>
-            </div>
+                    echo Html::beginTag('div', ['class' => 'col-lg-3', 'style' => 'background: ; ']);
+                    echo Html::beginTag('div', ['class' => 'index-ad', 'style' => '']);
+                    echo Html::beginTag('div', ['class' => '', 'style' => 'margin: 10px; background: ;']);
+
+                    if (isset($ad->photo)){
+                        echo Html::img(Url::to(['/site/showimage', 'filename' => $ad->photo->picture]), ['style' => 'width: 100%;']);
+                    }
+//                    echo Html::img($ad->photo, ['style' => 'width: 100%;']);
+
+                    echo Html::tag('h2', $ad->headline, ['style' => 'color: ;']);
+//                    echo Html::tag('p', $ad->description, ['style' => 'background: ;']);
+                    echo Html::tag('p', $ad->price . ' руб.', ['style' => 'font-size: 20px; font-weight: bold;']);
+                    echo Html::tag('p', getCategories()[$ad->category] . ' / ' . $ad->city, ['style' => 'text-align: right;']);
+//                    echo Html::tag('p', $ad->date, ['style' => 'text-align: right;']);
+
+                    echo Html::endTag('div');
+                    echo Html::endTag('div');
+                    echo Html::endTag('div');
+                    echo Html::endTag('a');
+
+                }
+
+
+            ?>
+
+        </div>
+
+        <div>
+            <?php
+
+            echo \yii\widgets\LinkPager::widget([
+            'pagination' => $pages,
+            ]);
+
+            ?>
         </div>
 
     </div>

@@ -37,7 +37,7 @@ class User extends \yii\db\ActiveRecord
         return [
             [['email', 'password', 'date'], 'required'],
             [['email', 'password', 'name', 'city', 'about', 'phone'], 'string'],
-            [['avatar'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
+            [['avatar'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpeg, jpg'],
             [['date'], 'safe'],
             [['auth_key', 'access_token'], 'string', 'max' => 32],
         ];
