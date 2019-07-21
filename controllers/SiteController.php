@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\PhotoTable;
+use SebastianBergmann\Diff\TimeEfficientImplementationTest;
 use Yii;
 use yii\data\Pagination;
 use yii\filters\AccessControl;
@@ -11,11 +12,13 @@ use app\models\AdTable;
 use app\models\UserTable;
 use app\models\Signup;
 use app\models\LoginForm;
+use yii\web\Controller;
 use yii\web\UploadedFile;
 use yii\helpers\BaseFileHelper;
 use app\models\User;
 
-class SiteController extends \app\controllers\AppController
+//class SiteController extends \app\controllers\AppController
+class SiteController extends Controller
 {
 
     public function behaviors()
@@ -124,11 +127,37 @@ class SiteController extends \app\controllers\AppController
 
     public function actionAd()
     {
+        $adModel = new AdTable();
         $adId = Yii::$app->request->get('id');
 
 //        $filename = 'web/uploads/ads/YhSsktoMA2.jpg';
 //        $this->actionShowimage($filename);
 
+        if (Yii::$app->request->post('PhotoTable')){
+            $picModel = new PhotoTable();
+            if ($picModel->saveImg($adId)){
+                Yii::$app->session->setFlash('update-success', 'Фото было успешно добавлено');
+            } else {
+                Yii::$app->session->setFlash('update-failed', 'Произошла ошибка при добавлении фотографии');
+            }
+        }
+
+        if (Yii::$app->request->post('AdTable')){
+
+            $postData = Yii::$app->request->post('AdTable');
+            $updateAdModel = new AdTable();
+
+            $updateAdModel = AdTable::findOne(['id' => $adId]);
+            $updateAdModel->attributes = Yii::$app->request->post('AdTable');
+            $updateAdModel->status = Yii::$app->request->post('AdTable')['status'];
+
+            if ($updateAdModel->validate()){
+                $updateAdModel->save();
+                Yii::$app->session->setFlash('update-success', 'Объявление было успено обновлено');
+            } else {
+                Yii::$app->session->setFlash('update-failed', 'Ошибка при обновлении объявления');
+            }
+        }
 
         if (isset($adId)){
             $adData = AdTable::find()->where(['id' => $adId])->one();
@@ -136,9 +165,8 @@ class SiteController extends \app\controllers\AppController
             $user = UserTable::find()->where(['id' => $adData->userId])->one();
         }
 
-//            AppController::debug($ads);
 
-        return $this->render('ad', compact(['adData', 'pictures', 'user']));
+        return $this->render('ad', ['adData' => $adData, 'pictures' => $pictures, 'user' => $user, 'adModel' => $adModel]);
     }
 
     public function downloadFile($fullpath){
@@ -152,6 +180,21 @@ class SiteController extends \app\controllers\AppController
             Yii::$app->end();
 
         }
+    }
+
+    public function actionDeleteimage($picture){
+
+        $imgToDelete = PhotoTable::findOne(['picture' => $picture]);
+        $picPath = Yii::getAlias('@photo') . '/' . $picture;
+        unlink($picPath);
+        $imgToDelete->delete();
+        if (Yii::$app->request->isAjax)
+        {
+            return true;
+        } else {
+            return $this->redirect(['site/index']);
+        }
+
     }
 
     function actionShowimage($filename = false) {
@@ -172,38 +215,42 @@ class SiteController extends \app\controllers\AppController
         $loginInfo = Yii::$app->user->identity;
 
         if (isset($_POST['UserTable'])){
-
-
             $model->attributes = Yii::$app->request->post('UserTable');
             $model->avatar = UploadedFile::getInstance($model, 'avatar');
 
-//            debug($model->avatar);
-//            die();
+            $userModel = UserTable::findOne([ 'id' => Yii::$app->user->identity->getId() ]);
+            if (isset($userModel->avatar)){
+                unlink('uploads/' . $userModel->avatar);
+            }
 
             if ($model->avatar){
-//                BaseFileHelper::createDirectory('uploads/');
-//                $randString = implode(array_slice(array_merge(range(0,9), range('a','z'), range('A','Z')), 0, 10));
                 $randString = Yii::$app->security->generateRandomString(10);
                 $avatarFile = $loginInfo['id'] . '-avatar-' . $randString . '.jpg';
                 $avatarPath = 'uploads/' . $avatarFile;
                 $model->avatar->saveAs($avatarPath);
                 $model->avatar = $avatarFile;
             }
+
             $model->saveUserData();
         }
 
+        // Pagination settings
         $userId = Yii::$app->request->get('id');
         if (isset($userId)){
             $userData = UserTable::find()->where(['id' => $userId])->one();
+            $userPostsData = AdTable::find()->where(['userId' => $userId]);
+            $countPosts = clone $userPostsData;
+            $postsPagination = new Pagination(['totalCount' => $countPosts->count()]);
+            // default value is 20
+            $postsPagination->pageSize = 5;
+            $userPosts = $userPostsData->offset($postsPagination->offset)->limit($postsPagination->limit)->all();
         }
 
-        return $this->render('profile', compact(['userData', 'loginInfo', 'model']));
+        return $this->render('profile', ['userData' => $userData, 'loginInfo' => $loginInfo, 'model' => $model, 'userPosts' => $userPosts, 'postsPagination' => $postsPagination]);
     }
 
     public function actionCreate(){
-
         $model = new AdTable();
-
         $picModel = new PhotoTable();
 
         if (Yii::$app->request->post('AdTable') && Yii::$app->request->post('PhotoTable')){
@@ -214,38 +261,14 @@ class SiteController extends \app\controllers\AppController
                 $model->status = true;
                 $model->date = date('Y-m-d H:i:s');
                 $model->save();
+                $picModel->saveImg($model->id);
                 Yii::$app->session->setFlash('create-success', 'Ваше объявление успешно создано');
             } else {
                 Yii::$app->session->setFlash('create-failed', 'Ошибка при создании объявления');
             }
-
-            $picModel->attributes = Yii::$app->request->post('PhotoTable');
-
-            $picModel->picture = UploadedFile::getInstance($picModel, 'picture');
-
-            $picName = Yii::$app->security->generateRandomString(10) . '.' . $picModel->picture->getExtension();
-
-//            BaseFileHelper::createDirectory('uploads/ads/');
-//            $picPath = 'uploads/ads/' . $picName;
-
-            $picPath = Yii::getAlias('@photo') . '/' . $picName;
-//            $picPath = $picName;
-
-            $picModel->date = date('Y-m-d H:i:s');
-            $picModel->adId = $model->id;
-
-//            debug($picPath);
-//            die();
-
-            $picModel->picture->saveAs($picPath);
-            $picModel->picture = $picName;
-
-            $picModel->save();
         }
 
         return $this->render('create', ['model' => $model, 'picModel' => $picModel]);
     }
-
-
 
 }

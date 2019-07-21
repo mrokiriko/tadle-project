@@ -27,9 +27,9 @@ class UserTable extends User
         $user->phone = $this->phone;
         $user->about = $this->about;
 
-        if (file_exists('uploads/' . $user->avatar)){
-            unlink('uploads/' . $user->avatar);
-        }
+//        if (file_exists('uploads/' . $user->avatar)){
+//            unlink('uploads/' . $user->avatar);
+//        }
 
         $user->avatar = $this->avatar;
 //        $user->avatar = $this->avatar->name;

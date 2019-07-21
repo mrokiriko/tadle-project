@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 $this->title = 'Profile';
 $this->params['breadcrumbs'][] = $this->title;
@@ -8,8 +9,12 @@ use yii\helpers\Html;
 
 ?>
 
-
+<div class="container">
+    <div class="row">
 <?php
+
+//    debug($userPosts);
+//    die();
 
     if ($userData['id'] == $loginInfo['id']){
 
@@ -31,7 +36,10 @@ use yii\helpers\Html;
         echo "<h4>Отредактировать информацию</h4>";
 
         echo $form->field($model, 'name')->textInput();
-        echo $form->field($model, 'city')->textInput();
+
+//        echo $form->field($model, 'city')->textInput();
+        echo $form->field($model, 'city')->dropDownList(getCities());
+
         echo $form->field($model, 'phone')->textInput();
         echo $form->field($model, 'about')->textInput()->label('Описание');
 
@@ -50,11 +58,54 @@ use yii\helpers\Html;
 
         echo "<h3>Profile name: ". $userData['name'] ."</h3>";
         echo "<h4>Email: ". $userData['email'] ."</h4>";
-        echo "<p><i>City: ". $userData['city'] ."</i></p>";
+        echo "<p><i>City: ". getCities()[$userData['city']] ."</i></p>";
         echo "<h6>about: ". $userData['name'] ."</h6>";
-        echo "<p><b>phone: ". $userData['phone'] ."</b></p>";
+        echo "<p><b>+7 ". $userData['phone'] ."</b></p>";
         echo "<p><i>date: ". $userData['date'] ."</i></p>";
     } else {
         echo "No such user...";
     }
+
+    ?>
+
+
+    <?php
+
+    if (count($userPosts) > 0){
+        echo "<br><h4>Объявления пользователя: </h4>";
+    } else {
+        echo "<br><h4>У пользователя нет объявлений...</h4>";
+    }
+
+    foreach ($userPosts as $post){
+
+        echo Html::beginTag('a', ['href' => \yii\helpers\Url::to(['site/ad', 'id' => $post->id])]);
+
+        echo Html::beginTag('div', ['class' => 'col-lg-3', 'style' => 'background: ; ']);
+        echo Html::beginTag('div', ['class' => 'index-ad', 'style' => '']);
+        echo Html::beginTag('div', ['class' => '', 'style' => 'margin: 10px; background: ;']);
+
+
+        echo Html::tag('h2', $post->headline, ['style' => 'color: ;']);
+        echo Html::tag('p', $post->price . ' руб.', ['style' => 'font-size: 20px; font-weight: bold;']);
+
+
+        echo Html::endTag('div');
+        echo Html::endTag('div');
+        echo Html::endTag('div');
+        echo Html::endTag('a');
+    }
+
 ?>
+    </div>
+</div>
+
+<div class="container">
+    <?php
+
+    echo \yii\widgets\LinkPager::widget([
+        'pagination' => $postsPagination,
+    ]);
+
+    ?>
+</div>

@@ -16,7 +16,11 @@ class AdTable extends ActiveRecord {
     public function rules(){
         return [
             [['category', 'price', 'city', 'headline', 'userId'], 'required'],
-            [['category', 'city', 'description', 'headline'], 'string'],
+//            [['category', 'city', 'description', 'headline'], 'string'],
+            [['category'], 'string', 'max' => 2],
+            [['city'], 'string', 'max' => 30],
+            [['headline'], 'string', 'max' => 40],
+            [['description'], 'string', 'max' => 1000],
             [['price'], 'double'],
             [['date'], 'safe'],
         ];

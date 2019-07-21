@@ -16,7 +16,7 @@ class Signup extends Model
             [['email', 'password'], 'required'],
             ['email', 'email'],
             ['email', 'unique', 'targetClass'=>'app\models\User'],
-            ['password', 'string', 'min' => 6, 'max' => 32],
+            ['password', 'string', 'min' => 6, 'max' => 64],
         ];
     }
 
