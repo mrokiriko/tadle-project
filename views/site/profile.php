@@ -13,7 +13,7 @@ use yii\helpers\Html;
     <div class="row">
 <?php
 
-//    debug($userPosts);
+//    debug(Yii::getVersion());
 //    die();
 
     if ($userData['id'] == $loginInfo['id']){
