@@ -71,11 +71,20 @@ use yii\helpers\Html;
 
     <?php
 
-    if (count($userPosts) > 0){
+
+if (count($userPosts) > 0){
         echo "<br><h4>Объявления пользователя: </h4>";
     } else {
         echo "<br><h4>У пользователя нет объявлений...</h4>";
     }
+
+
+echo Html::beginForm('', 'get');
+echo Html::dropDownList('sort', $sortFilter, [3 => 'Сначала новые', 4 => 'Сначала старые']);
+echo Html::dropDownList('category', $categoryFilter, array_merge(['0' => 'Все категории'], getCategories()));
+echo Html::input('text', 'search', $searchFilter);
+echo Html::submitButton('Поиск');
+echo Html::endForm();
 
     foreach ($userPosts as $post){
 
@@ -88,6 +97,7 @@ use yii\helpers\Html;
 
         echo Html::tag('h2', $post->headline, ['style' => 'color: ;']);
         echo Html::tag('p', $post->price . ' руб.', ['style' => 'font-size: 20px; font-weight: bold;']);
+        echo Html::tag('p', getCategories()[$post->category] . ' / ' . $post->date, ['style' => '']);
 
 
         echo Html::endTag('div');

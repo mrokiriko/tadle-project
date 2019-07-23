@@ -24,10 +24,6 @@ if (Yii::$app->session->hasFlash('create-failed'))
 
 if (Yii::$app->user->identity){
 
-
-//    echo Html::img('uploads/' . $userData['avatar'], ['alt' => 'yo, its my avatar', 'width' => 200]);
-
-
     $form = ActiveForm::begin(['class' => 'form-horizontal']);
 
     echo Html::tag('i', 'Добавить несколько фотографий можно будет после создания объявления');
@@ -39,8 +35,6 @@ if (Yii::$app->user->identity){
     echo $form->field($model, 'headline')->textInput()->label('Название');
     echo $form->field($model, 'price')->textInput()->label('Цена');
     echo $form->field($model, 'city')->dropDownList(getCities());
-
-//    echo $form->field($model, 'category')->textInput()->label('Категория');
 
     echo $form->field($model, 'category')->dropDownList(getCategories());
 

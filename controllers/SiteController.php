@@ -59,20 +59,40 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
-        $ads = AdTable::find()->where(['status' => 1]);
 
+        $sortFilter = SORT_DESC;
+        $categoryFilter = null;
+        $searchFilter = '';
+
+        if (Yii::$app->request->get('sort')){
+            $sortFilter = Yii::$app->request->get('sort');
+            switch ($sortFilter){
+                case 3: $sortFilter = SORT_DESC; break;
+                case 4: $sortFilter = SORT_ASC; break;
+            }
+        }
+        if (Yii::$app->request->get('category'))
+            $categoryFilter = Yii::$app->request->get('category');
+
+        if (Yii::$app->request->get('search'))
+            $searchFilter = Yii::$app->request->get('search');
+
+        if ($categoryFilter > 0){
+            $ads = AdTable::find()->where(['status' => 1, 'category' => $categoryFilter])->andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+        } else {
+            $ads = AdTable::find()->where(['status' => 1])->andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+        }
 
         $countAds = clone $ads;
 
         $pages = new Pagination(['totalCount' => $countAds->count()]);
 
         //default value is 20
-        $pages->pageSize = 5;
+        $pages->pageSize = 20;
 
         $models = $ads->offset($pages->offset)->limit($pages->limit)->all();
 
         foreach ($models as $ad){
-
             $adPhoto = PhotoTable::find()->where(['adId' => $ad->id])->one();
 
             if (isset($adPhoto)){
@@ -80,7 +100,8 @@ class SiteController extends Controller
             }
         }
 
-        return $this->render('index', ['ads' => $ads, 'models' => $models, 'pages' => $pages]);
+        return $this->render('index', ['ads' => $ads, 'models' => $models, 'pages' => $pages,
+            'sortFilter' => $sortFilter, 'categoryFilter' => $categoryFilter, 'searchFilter' => $searchFilter]);
     }
 
     public function actionLogin()
@@ -111,15 +132,10 @@ class SiteController extends Controller
 
         if (isset($_POST['Signup'])){
             $model->attributes = Yii::$app->request->post('Signup');
-//            debug($_POST['Signup']);
-//            die();
         }
 
         if ($model->validate() && $model->signup()){
             return $this->goHome();
-//            $model->delete();
-//            unset($_POST['Signup']);
-//            return $this->actionLogin();
         }
 
         return $this->render('signup', ['model' => $model]);
@@ -129,9 +145,6 @@ class SiteController extends Controller
     {
         $adModel = new AdTable();
         $adId = Yii::$app->request->get('id');
-
-//        $filename = 'web/uploads/ads/YhSsktoMA2.jpg';
-//        $this->actionShowimage($filename);
 
         if (Yii::$app->request->post('PhotoTable')){
             $picModel = new PhotoTable();
@@ -198,18 +211,30 @@ class SiteController extends Controller
     }
 
     function actionShowimage($filename = false) {
-
         $path = Yii::$app->basePath . '/web/' . Yii::getAlias('@photo') . '/' . $filename;
-
-//        debug($path);
-//        die();
-
         $this->downloadFile($path);
-
         return 'really nothing here';
     }
 
     public function actionProfile(){
+
+        $sortFilter = SORT_DESC;
+        $categoryFilter = null;
+        $searchFilter = '';
+
+        if (Yii::$app->request->get('sort')){
+            $sortFilter = Yii::$app->request->get('sort');
+            switch ($sortFilter){
+                case 3: $sortFilter = SORT_DESC; break;
+                case 4: $sortFilter = SORT_ASC; break;
+            }
+        }
+        if (Yii::$app->request->get('category'))
+            $categoryFilter = Yii::$app->request->get('category');
+
+        if (Yii::$app->request->get('search'))
+            $searchFilter = Yii::$app->request->get('search');
+
         $model = new UserTable();
 
         $loginInfo = Yii::$app->user->identity;
@@ -238,7 +263,17 @@ class SiteController extends Controller
         $userId = Yii::$app->request->get('id');
         if (isset($userId)){
             $userData = UserTable::find()->where(['id' => $userId])->one();
-            $userPostsData = AdTable::find()->where(['userId' => $userId]);
+
+
+//            $userPostsData = AdTable::find()->where(['userId' => $userId]);
+            if ($categoryFilter > 0){
+                $userPostsData = AdTable::find()->where(['userId' => $userId, 'category' => $categoryFilter])->
+                andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+            } else {
+                $userPostsData = AdTable::find()->where(['userId' => $userId])->
+                andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+            }
+
             $countPosts = clone $userPostsData;
             $postsPagination = new Pagination(['totalCount' => $countPosts->count()]);
             // default value is 20
@@ -246,7 +281,8 @@ class SiteController extends Controller
             $userPosts = $userPostsData->offset($postsPagination->offset)->limit($postsPagination->limit)->all();
         }
 
-        return $this->render('profile', ['userData' => $userData, 'loginInfo' => $loginInfo, 'model' => $model, 'userPosts' => $userPosts, 'postsPagination' => $postsPagination]);
+        return $this->render('profile', ['userData' => $userData, 'loginInfo' => $loginInfo, 'model' => $model, 'userPosts' => $userPosts, 'postsPagination' => $postsPagination,
+            'sortFilter' => $sortFilter, 'categoryFilter' => $categoryFilter, 'searchFilter' => $searchFilter]);
     }
 
     public function actionCreate(){
