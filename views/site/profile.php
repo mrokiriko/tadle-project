@@ -79,12 +79,17 @@ if (count($userPosts) > 0){
     }
 
 
-echo Html::beginForm('', 'get');
-echo Html::dropDownList('sort', $sortFilter, [3 => 'Сначала новые', 4 => 'Сначала старые']);
-echo Html::dropDownList('category', $categoryFilter, array_merge(['0' => 'Все категории'], getCategories()));
-echo Html::input('text', 'search', $searchFilter);
-echo Html::submitButton('Поиск');
-echo Html::endForm();
+    echo Html::beginForm('', 'get');
+    echo Html::dropDownList('status', $statusFilter, [1 => 'Активные', 0 => 'Неактивные']);
+    echo Html::dropDownList('sort', $sortFilter, [3 => 'Сначала новые', 4 => 'Сначала старые']);
+    echo Html::dropDownList('category', $categoryFilter, array_merge(['0' => 'Все категории'], getCategories()));
+    echo Html::dropDownList('city', $cityFilter, array_merge(['0' => 'Все города'], getCities()));
+    echo Html::input('text', 'search', $searchFilter);
+    echo Html::submitButton('Поиск');
+    echo Html::endForm();
+
+
+$status = ['Неактивное', 'Активное'];
 
     foreach ($userPosts as $post){
 
@@ -93,11 +98,17 @@ echo Html::endForm();
         echo Html::beginTag('div', ['class' => 'col-lg-3', 'style' => 'background: ; ']);
         echo Html::beginTag('div', ['class' => 'index-ad', 'style' => '']);
         echo Html::beginTag('div', ['class' => '', 'style' => 'margin: 10px; background: ;']);
+        echo Html::tag('p', $status[$post->status], ['style' => 'font-size: 15px; font-weight: bold;']);
 
+
+        if (isset($post->photo))
+            echo Html::img(Url::to(['/site/showimage', 'filename' => $post->photo->picture]), ['style' => 'width: 100%;']);
 
         echo Html::tag('h2', $post->headline, ['style' => 'color: ;']);
         echo Html::tag('p', $post->price . ' руб.', ['style' => 'font-size: 20px; font-weight: bold;']);
-        echo Html::tag('p', getCategories()[$post->category] . ' / ' . $post->date, ['style' => '']);
+        echo Html::tag('h5', $post->description, ['style' => 'color: ;']);
+        echo Html::tag('p', getCategories()[$post->category] . ' / ' . getCities()[$post->city], ['style' => 'text-align: right;']);
+        echo Html::tag('p', $post->date, ['style' => 'text-align: right;']);
 
 
         echo Html::endTag('div');

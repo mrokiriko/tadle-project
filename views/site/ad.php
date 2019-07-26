@@ -105,7 +105,7 @@ $this->params['breadcrumbs'][] = $this->title;
         echo "<h4><b>" . $adData['price'] . " руб." . "</b></h4>";
         echo "<i>" . getCategories()[$adData['category']] . " / " . getCities()[$adData['city']] . "</i>";
         echo "<br>";
-        echo "<p>" . $adData['date'] . "</p>";
+        echo "<p>" . date('m/d/y h:i:s a', $adData['date']) . "</p>";
         echo "<p>" . "Контакты: " . $user['phone'] . ", " . $user['email'] . "</p>";
         echo Html::a($user['name'], ['site/profile', 'id' => $user['id']]);
 

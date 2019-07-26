@@ -62,7 +62,23 @@ class SiteController extends Controller
 
         $sortFilter = SORT_DESC;
         $categoryFilter = null;
+        $cityFilter = null;
         $searchFilter = '';
+
+        $statusFilter = Yii::$app->request->get('status');
+        if (!isset($statusFilter))
+            $statusFilter = 1;
+
+        $deleteAdId = Yii::$app->request->post('close-ad');
+        if (isset($deleteAdId)){
+            $deleteAd = AdTable::find()->where(['id' => $deleteAdId])->one();
+            if ($deleteAd->userId == Yii::$app->user->getId()){
+                $deleteAd->status = 0;
+                if ($deleteAd->validate()){
+                    $deleteAd->save();
+                }
+            }
+        }
 
         if (Yii::$app->request->get('sort')){
             $sortFilter = Yii::$app->request->get('sort');
@@ -74,14 +90,25 @@ class SiteController extends Controller
         if (Yii::$app->request->get('category'))
             $categoryFilter = Yii::$app->request->get('category');
 
+        if (Yii::$app->request->get('city'))
+            $cityFilter = Yii::$app->request->get('city');
+
         if (Yii::$app->request->get('search'))
             $searchFilter = Yii::$app->request->get('search');
 
-        if ($categoryFilter > 0){
-            $ads = AdTable::find()->where(['status' => 1, 'category' => $categoryFilter])->andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
-        } else {
-            $ads = AdTable::find()->where(['status' => 1])->andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+
+        $ads = AdTable::find()->where(['status' => $statusFilter]);
+
+        if ($categoryFilter > 0)
+            $ads->where(['category' => $categoryFilter]);
+
+        if ($cityFilter > 0){
+            $ads->where(['city' => $cityFilter]);
         }
+
+        $ads = $ads->andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+
+
 
         $countAds = clone $ads;
 
@@ -101,7 +128,7 @@ class SiteController extends Controller
         }
 
         return $this->render('index', ['ads' => $ads, 'models' => $models, 'pages' => $pages,
-            'sortFilter' => $sortFilter, 'categoryFilter' => $categoryFilter, 'searchFilter' => $searchFilter]);
+            'sortFilter' => $sortFilter, 'categoryFilter' => $categoryFilter, 'searchFilter' => $searchFilter, 'statusFilter' => $statusFilter, 'cityFilter' => $cityFilter]);
     }
 
     public function actionLogin()
@@ -220,7 +247,12 @@ class SiteController extends Controller
 
         $sortFilter = SORT_DESC;
         $categoryFilter = null;
+        $cityFilter = null;
         $searchFilter = '';
+
+        $statusFilter = Yii::$app->request->get('status');
+        if (!isset($statusFilter))
+            $statusFilter = 1;
 
         if (Yii::$app->request->get('sort')){
             $sortFilter = Yii::$app->request->get('sort');
@@ -232,8 +264,12 @@ class SiteController extends Controller
         if (Yii::$app->request->get('category'))
             $categoryFilter = Yii::$app->request->get('category');
 
+        if (Yii::$app->request->get('city'))
+            $cityFilter = Yii::$app->request->get('city');
+
         if (Yii::$app->request->get('search'))
             $searchFilter = Yii::$app->request->get('search');
+
 
         $model = new UserTable();
 
@@ -264,25 +300,48 @@ class SiteController extends Controller
         if (isset($userId)){
             $userData = UserTable::find()->where(['id' => $userId])->one();
 
-
 //            $userPostsData = AdTable::find()->where(['userId' => $userId]);
-            if ($categoryFilter > 0){
-                $userPostsData = AdTable::find()->where(['userId' => $userId, 'category' => $categoryFilter])->
-                andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
-            } else {
-                $userPostsData = AdTable::find()->where(['userId' => $userId])->
-                andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+//            if ($categoryFilter > 0){
+//                $userPostsData = AdTable::find()->where(['userId' => $userId, 'category' => $categoryFilter])->
+//                andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+//            } else {
+//                $userPostsData = AdTable::find()->where(['userId' => $userId])->
+//                andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+//            }
+
+            $userPostsData = AdTable::find()->where(['status' => $statusFilter]);
+
+            if ($categoryFilter > 0)
+                $userPostsData->where(['category' => $categoryFilter]);
+
+            if ($cityFilter > 0){
+                $userPostsData->where(['city' => $cityFilter]);
             }
+
+            $userPostsData = $userPostsData->andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
+
 
             $countPosts = clone $userPostsData;
             $postsPagination = new Pagination(['totalCount' => $countPosts->count()]);
             // default value is 20
-            $postsPagination->pageSize = 5;
+            $postsPagination->pageSize = 20;
             $userPosts = $userPostsData->offset($postsPagination->offset)->limit($postsPagination->limit)->all();
+
+
+            foreach ($userPosts as $ad){
+                $adPhoto = PhotoTable::find()->where(['adId' => $ad->id])->one();
+
+                if (isset($adPhoto)){
+                    $ad->photo = $adPhoto;
+                }
+            }
+
         }
 
         return $this->render('profile', ['userData' => $userData, 'loginInfo' => $loginInfo, 'model' => $model, 'userPosts' => $userPosts, 'postsPagination' => $postsPagination,
-            'sortFilter' => $sortFilter, 'categoryFilter' => $categoryFilter, 'searchFilter' => $searchFilter]);
+            'sortFilter' => $sortFilter, 'categoryFilter' => $categoryFilter, 'searchFilter' => $searchFilter, 'statusFilter' => $statusFilter, 'cityFilter' => $cityFilter]);
+
+
     }
 
     public function actionCreate(){
@@ -295,7 +354,7 @@ class SiteController extends Controller
 
             if ($model->validate()){
                 $model->status = true;
-                $model->date = date('Y-m-d H:i:s');
+                $model->date = date('Y-m-d G:i:s');
                 $model->save();
                 $picModel->saveImg($model->id);
                 Yii::$app->session->setFlash('create-success', 'Ваше объявление успешно создано');

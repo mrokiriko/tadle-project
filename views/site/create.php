@@ -12,6 +12,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
 <div class="container" style="background: ;">
 
+<script>
+    $(document).ready(function(){
+
+        $('#delete-file-button').click(function(){
+            document.getElementById("file-input").value = "";
+        });
+
+    })
+</script>
 <?php
 
 if (Yii::$app->session->hasFlash('create-success'))
@@ -20,15 +29,15 @@ if (Yii::$app->session->hasFlash('create-success'))
 if (Yii::$app->session->hasFlash('create-failed'))
     echo "<div class=\"alert alert-danger\" role=\"alert\">" . Yii::$app->session->getFlash('create-failed') . "</div>";
 
-
-
 if (Yii::$app->user->identity){
 
     $form = ActiveForm::begin(['class' => 'form-horizontal']);
 
     echo Html::tag('i', 'Добавить несколько фотографий можно будет после создания объявления');
 
-    echo $form->field($picModel, 'picture')->fileInput();
+    echo $form->field($picModel, 'picture')->fileInput(['id' => 'file-input']);
+
+    echo Html::button('Удалить фото', ['id' => 'delete-file-button', 'class' => 'btn']);
 
     $model->city = \app\models\UserTable::findOne([ 'id' => Yii::$app->user->identity->getId() ])->city;
 
