@@ -42,7 +42,7 @@ class User extends \yii\db\ActiveRecord
             [['name'], 'string', 'max' => 60],
             [['city'], 'string', 'max' => 30],
             [['about'], 'string', 'max' => 300],
-            [['phone'], 'string', 'max' => 10],
+            [['phone'], 'integer', 'min' => 0, 'max' => 9999999999],
 //            ['phone', 'match', 'pattern' => '/^(8)[(](\d{3})[)](\d{3})[-](\d{2})[-](\d{2})/', 'message' => 'Телефон должен быть в формате 8(XXX)XXX-XX-XX'],
             [['avatar'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpeg, jpg',
                 'maxSize' => 3145728, 'tooBig'=>'Размер файла не должен превышать 3МБ'],

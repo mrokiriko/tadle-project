@@ -13,7 +13,9 @@ $this->title = 'TADLE - the future of public advertisement';
     <div class="body-content">
 
         <?php
-            echo Html::beginForm('', 'get');
+//            echo Html::beginForm(Url::to(['site/profile', 'id' => $userData['id']]), 'get');
+
+            echo Html::beginForm(Url::to(['site/index']), 'get');
             echo Html::dropDownList('status', $statusFilter, [1 => 'Активные', 0 => 'Неактивные']);
             echo Html::dropDownList('sort', $sortFilter, [3 => 'Сначала новые', 4 => 'Сначала старые']);
             echo Html::dropDownList('category', $categoryFilter, array_merge(['0' => 'Все категории'], getCategories()));
@@ -31,8 +33,6 @@ $this->title = 'TADLE - the future of public advertisement';
 
                 echo Html::beginTag('a', ['href' => \yii\helpers\Url::to(['site/ad', 'id' => $ad->id])]);
 
-
-
                 echo Html::beginTag('div', ['class' => 'col-lg-3', 'style' => 'background: ; ']);
 
 
@@ -48,7 +48,7 @@ $this->title = 'TADLE - the future of public advertisement';
 
 
                 if (isset($ad->photo)){
-                    echo Html::img(Url::to(['/site/showimage', 'filename' => $ad->photo->picture]), ['style' => 'width: 100%;']);
+                    echo Html::img(Url::to(['/site/showimage', 'filename' => $ad->photo->picture]), ['style' => 'width: 100%; max-height: 300px;']);
                 }
 
                 echo Html::tag('h2', $ad->headline, ['style' => 'color: ;']);

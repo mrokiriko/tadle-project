@@ -16,17 +16,36 @@ $this->params['breadcrumbs'][] = $this->title;
             cache: false,
             url: url,
             success: function(response){
-                // alert('yeeeeeeah: ' + response);
                 var link = 'div[id="' + file + '"]';
                 $(link).remove();
             },
             error: function (err) {
-                // alert('error popped up: ' + err);
                 console.log(err)
             }
         });
     }
+
+    $(document).ready(function(){
+
+        $("img").click(function (){
+            var modal = document.getElementById("popup-img-modal");
+            if (modal.style.display != "block") {
+                modal.style.display = "block";
+            } else {
+                modal.style.display = "none";
+            }
+            document.getElementById("modal-img").src = this.src;
+        });
+
+    });
+
 </script>
+
+<!-- The Modal -->
+<div id="popup-img-modal" class="modal">
+    <img class="modal-content" id="modal-img">
+    <!--    <div id="caption"></div>-->
+</div>
 
 <div class="container" style="background: ;">
 
@@ -36,7 +55,6 @@ $this->params['breadcrumbs'][] = $this->title;
         echo "<div class=\"alert alert-success\" role=\"alert\">" . Yii::$app->session->getFlash('update-success') . "</div>";
     if (Yii::$app->session->hasFlash('update-failed'))
         echo "<div class=\"alert alert-danger\" role=\"alert\">" . Yii::$app->session->getFlash('update-failed') . "</div>";
-
 
     if (isset($adData) && ($adData->userId == Yii::$app->user->getId())) {
 
@@ -94,9 +112,13 @@ $this->params['breadcrumbs'][] = $this->title;
 
     } else if (isset($adData)){
 
+        echo Html::beginTag('div', ['class' => 'row']);
+
+        echo Html::beginTag('div', ['class' => 'col-lg-8', 'style' => 'background: ;']);
+
         if (isset($pictures)){
             foreach($pictures as $picture) {
-                echo "<img src=" . Url::to(['/site/showimage', 'filename' => $picture->picture]) . " style='width: 200px;'>";
+                echo "<img src=" . Url::to(['/site/showimage', 'filename' => $picture->picture]) . " style='width: 200px; max-height: 300px;'>";
             }
         }
 
@@ -105,9 +127,26 @@ $this->params['breadcrumbs'][] = $this->title;
         echo "<h4><b>" . $adData['price'] . " руб." . "</b></h4>";
         echo "<i>" . getCategories()[$adData['category']] . " / " . getCities()[$adData['city']] . "</i>";
         echo "<br>";
-        echo "<p>" . date('m/d/y h:i:s a', $adData['date']) . "</p>";
-        echo "<p>" . "Контакты: " . $user['phone'] . ", " . $user['email'] . "</p>";
-        echo Html::a($user['name'], ['site/profile', 'id' => $user['id']]);
+        echo "<p>" . $adData['date'] . "</p>";
+
+        echo Html::endTag('div');
+
+        echo Html::beginTag('div', ['class' => 'col-lg-4', 'style' => 'background: ;']);
+
+        if (isset($user['avatar'])){
+            echo Html::img(Url::to(['uploads/' . $user['avatar']]), ['alt' => 'yo, its my avatar', 'width' => 200]);
+        }
+
+        echo '<br>';
+
+        echo Html::a($user['name'] . ' (' . $userCount . ')', ['site/profile', 'id' => $user['id']]);
+        echo Html::tag('p', 'На сайте с ' . $user['date']);
+        echo Html::tag('p', $user['about']);
+        echo Html::tag('p', "Контакты: +7" . $user['phone'] . ", " . $user['email']);
+
+        echo Html::endTag('div');
+        echo Html::endTag('div');
+
 
     } else {
         echo "<h3>No such advertisement...</h3>";

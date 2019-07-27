@@ -15,7 +15,7 @@ class m190722_095042_create_photo_table extends Migration
         $this->createTable('{{%photo}}', [
             'id' => $this->primaryKey()->notNull(),
             'picture' => $this->text()->notNull(),
-            'date' => $this->date()->notNull(),
+            'date' => $this->timestamp()->notNull(),
             'adId' => $this->integer()->notNull(),
         ]);
 

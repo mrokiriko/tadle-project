@@ -20,8 +20,8 @@ class m190722_095022_create_user_table extends Migration
             'avatar' => $this->text(),
             'city' => $this->text(),
             'about' => $this->text(),
-            'phone' => $this->text(),
-            'date' => $this->date()->notNull(),
+            'phone' => $this->integer(),
+            'date' => $this->timestamp()->notNull(),
             'auth_key' => $this->char([32]),
             'access_token' => $this->char([32]),
         ]);

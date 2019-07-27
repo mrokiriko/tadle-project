@@ -6,15 +6,17 @@ $this->title = 'Profile';
 $this->params['breadcrumbs'][] = $this->title;
 
 use yii\helpers\Html;
-
 ?>
+
 
 <div class="container">
     <div class="row">
+
 <?php
 
 //    debug(Yii::getVersion());
 //    die();
+
 
     if ($userData['id'] == $loginInfo['id']){
 
@@ -24,10 +26,16 @@ use yii\helpers\Html;
         }
 
         if (isset($userData['avatar'])){
-            echo Html::img('uploads/' . $userData['avatar'], ['alt' => 'yo, its my avatar', 'width' => 200]);
+            echo Html::img(Url::to(['uploads/' . $userData['avatar']]), ['alt' => 'yo, its my avatar', 'width' => 200]);
+
+            if ($userData['avatar'] != getDefaultAvatar()){
+                echo Html::beginForm('', 'post');
+                echo Html::input('hidden', 'delete-avatar', $userData['avatar']);
+                echo Html::submitButton('Удалить аватар');
+                echo Html::endForm();
+            }
         }
 
-//        echo Html::img('uploads/' . $userData['avatar'], ['alt' => 'yo, its my avatar', 'width' => 200]);
 
         $form = ActiveForm::begin(['class' => 'form-horizontal']);
 
@@ -35,12 +43,18 @@ use yii\helpers\Html;
 
         echo "<h4>Отредактировать информацию</h4>";
 
-        echo $form->field($model, 'name')->textInput();
+        echo $form->field($model, 'name')->textInput()->label('Имя на сайте');
+        echo $form->field($model, 'city')->dropDownList(getCities())->label('Выберите город');
 
-//        echo $form->field($model, 'city')->textInput();
-        echo $form->field($model, 'city')->dropDownList(getCities());
+        echo Html::label('Телефон для связи');
 
-        echo $form->field($model, 'phone')->textInput();
+        echo Html::beginTag('div', ['class' => 'input-group']);
+
+        echo Html::tag('span', '+7', ['class' => 'input-group-addon']);
+        echo Html::activeTextInput($model, 'phone', ['class' => 'form-control', 'maxlength' => '10']);
+
+        echo Html::endTag('div');
+
         echo $form->field($model, 'about')->textInput()->label('Описание');
 
         echo '<div> <button type="submit" class="btn btn-primary">Сохранить</button> </div>';
@@ -48,13 +62,10 @@ use yii\helpers\Html;
         ActiveForm::end();
 
     } else if (isset($userData)){
-//        echo "<img src=" . $userData['avatar'] . "></img>";
-
 
         if (isset($userData['avatar'])){
-            echo Html::img('uploads/' . $userData['avatar'], ['alt' => 'yo, its my avatar', 'width' => 200]);
+            echo Html::img(Url::to(['uploads/' . $userData['avatar']]), ['alt' => 'yo, its my avatar', 'width' => 200]);
         }
-//        echo Html::img('uploads/' . $userData['avatar'], ['alt' => 'yo, its my avatar', 'width' => 200]);
 
         echo "<h3>Profile name: ". $userData['name'] ."</h3>";
         echo "<h4>Email: ". $userData['email'] ."</h4>";
@@ -78,8 +89,7 @@ if (count($userPosts) > 0){
         echo "<br><h4>У пользователя нет объявлений...</h4>";
     }
 
-
-    echo Html::beginForm('', 'get');
+    echo Html::beginForm(Url::to(['site/profile', 'id' => $userData['id']]), 'get');
     echo Html::dropDownList('status', $statusFilter, [1 => 'Активные', 0 => 'Неактивные']);
     echo Html::dropDownList('sort', $sortFilter, [3 => 'Сначала новые', 4 => 'Сначала старые']);
     echo Html::dropDownList('category', $categoryFilter, array_merge(['0' => 'Все категории'], getCategories()));
@@ -102,7 +112,7 @@ $status = ['Неактивное', 'Активное'];
 
 
         if (isset($post->photo))
-            echo Html::img(Url::to(['/site/showimage', 'filename' => $post->photo->picture]), ['style' => 'width: 100%;']);
+            echo Html::img(Url::to(['/site/showimage', 'filename' => $post->photo->picture]), ['style' => 'width: 100%; max-height: 300px;']);
 
         echo Html::tag('h2', $post->headline, ['style' => 'color: ;']);
         echo Html::tag('p', $post->price . ' руб.', ['style' => 'font-size: 20px; font-weight: bold;']);

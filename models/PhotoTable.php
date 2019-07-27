@@ -17,13 +17,30 @@ class PhotoTable extends ActiveRecord
 
     public function rules(){
         return [
-            [['picture', 'date', 'adId'], 'required'],
+            [['date', 'adId'], 'required'],
             [['picture'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpeg, jpg',
             'maxSize' => 10485760, 'tooBig'=>'Размер файла не должен превышать 10МБ'],
             [['date'], 'safe'],
         ];
     }
 
+
+
+    public function isImgSent(){
+
+        $this->attributes = Yii::$app->request->post('PhotoTable');
+        $this->picture = UploadedFile::getInstance($this, 'picture');
+
+        if (isset($this->picture)){
+            return true;
+        } else {
+            return false;
+        }
+
+//        debug($this->picture);
+//        die();
+
+    }
 
     public function saveImg($adId){
         $this->attributes = Yii::$app->request->post('PhotoTable');

@@ -100,10 +100,10 @@ class SiteController extends Controller
         $ads = AdTable::find()->where(['status' => $statusFilter]);
 
         if ($categoryFilter > 0)
-            $ads->where(['category' => $categoryFilter]);
+            $ads->andFilterWhere(['category' => $categoryFilter]);
 
         if ($cityFilter > 0){
-            $ads->where(['city' => $cityFilter]);
+            $ads->andFilterWhere(['city' => $cityFilter]);
         }
 
         $ads = $ads->andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
@@ -162,6 +162,10 @@ class SiteController extends Controller
         }
 
         if ($model->validate() && $model->signup()){
+            $loginModel = new LoginForm();
+            $loginModel->username = $model->email;
+            $loginModel->password = $model->password;
+            $loginModel->login();
             return $this->goHome();
         }
 
@@ -203,10 +207,12 @@ class SiteController extends Controller
             $adData = AdTable::find()->where(['id' => $adId])->one();
             $pictures = PhotoTable::find()->where(['adId' => $adId])->all();
             $user = UserTable::find()->where(['id' => $adData->userId])->one();
+//            $user->count = count(AdTable::findAll(['userId' => $adData->userId]));
+            $userCount = count(AdTable::findAll(['userId' => $adData->userId]));
         }
 
 
-        return $this->render('ad', ['adData' => $adData, 'pictures' => $pictures, 'user' => $user, 'adModel' => $adModel]);
+        return $this->render('ad', ['adData' => $adData, 'pictures' => $pictures, 'user' => $user, 'adModel' => $adModel, 'userCount' => $userCount]);
     }
 
     public function downloadFile($fullpath){
@@ -251,6 +257,7 @@ class SiteController extends Controller
         $searchFilter = '';
 
         $statusFilter = Yii::$app->request->get('status');
+
         if (!isset($statusFilter))
             $statusFilter = 1;
 
@@ -275,16 +282,26 @@ class SiteController extends Controller
 
         $loginInfo = Yii::$app->user->identity;
 
-        if (isset($_POST['UserTable'])){
+        if (isset($_POST['delete-avatar']) && $_POST['delete-avatar'] != getDefaultAvatar()){
+            unlink('uploads/' . $_POST['delete-avatar']);
+
+            $model = UserTable::findOne([ 'id' => Yii::$app->user->identity->getId() ]);
+            $model->avatar = getDefaultAvatar();
+            $model->saveUserData();
+        } else if (isset($_POST['UserTable'])){
             $model->attributes = Yii::$app->request->post('UserTable');
-            $model->avatar = UploadedFile::getInstance($model, 'avatar');
+            $newAvatar = UploadedFile::getInstance($model, 'avatar');
 
             $userModel = UserTable::findOne([ 'id' => Yii::$app->user->identity->getId() ]);
-            if (isset($userModel->avatar)){
-                unlink('uploads/' . $userModel->avatar);
-            }
+            $model->avatar = $userModel->avatar;
 
-            if ($model->avatar){
+            if (isset($newAvatar)){
+                $model->avatar = $newAvatar;
+
+                if (isset($userModel->avatar) && $userModel->avatar != getDefaultAvatar()){
+                    unlink('uploads/' . $userModel->avatar);
+                }
+
                 $randString = Yii::$app->security->generateRandomString(10);
                 $avatarFile = $loginInfo['id'] . '-avatar-' . $randString . '.jpg';
                 $avatarPath = 'uploads/' . $avatarFile;
@@ -300,26 +317,16 @@ class SiteController extends Controller
         if (isset($userId)){
             $userData = UserTable::find()->where(['id' => $userId])->one();
 
-//            $userPostsData = AdTable::find()->where(['userId' => $userId]);
-//            if ($categoryFilter > 0){
-//                $userPostsData = AdTable::find()->where(['userId' => $userId, 'category' => $categoryFilter])->
-//                andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
-//            } else {
-//                $userPostsData = AdTable::find()->where(['userId' => $userId])->
-//                andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
-//            }
-
-            $userPostsData = AdTable::find()->where(['status' => $statusFilter]);
+            $userPostsData = AdTable::find()->where(['status' => $statusFilter, 'userId' => $userId]);
 
             if ($categoryFilter > 0)
-                $userPostsData->where(['category' => $categoryFilter]);
+                $userPostsData->andFilterWhere(['category' => $categoryFilter]);
 
             if ($cityFilter > 0){
-                $userPostsData->where(['city' => $cityFilter]);
+                $userPostsData->andFilterWhere(['city' => $cityFilter]);
             }
 
             $userPostsData = $userPostsData->andFilterWhere(['like', 'LOWER(headline)', strtolower($searchFilter)])->orderBy(['date' => $sortFilter]);
-
 
             $countPosts = clone $userPostsData;
             $postsPagination = new Pagination(['totalCount' => $countPosts->count()]);
@@ -348,7 +355,7 @@ class SiteController extends Controller
         $model = new AdTable();
         $picModel = new PhotoTable();
 
-        if (Yii::$app->request->post('AdTable') && Yii::$app->request->post('PhotoTable')){
+        if (Yii::$app->request->post('AdTable')){
             $model->attributes = Yii::$app->request->post('AdTable');
             $model->userId = Yii::$app->user->getId();
 
@@ -356,7 +363,13 @@ class SiteController extends Controller
                 $model->status = true;
                 $model->date = date('Y-m-d G:i:s');
                 $model->save();
-                $picModel->saveImg($model->id);
+
+                $picModel->attributes = Yii::$app->request->post('PhotoTable');
+
+                if ($picModel->isImgSent()){
+                    $picModel->saveImg($model->id);
+                }
+
                 Yii::$app->session->setFlash('create-success', 'Ваше объявление успешно создано');
             } else {
                 Yii::$app->session->setFlash('create-failed', 'Ошибка при создании объявления');

@@ -15,6 +15,9 @@ function getCategories(){
     ];
 }
 
+function getDefaultAvatar(){
+    return 'default-avatar.jpg';
+}
 
 function getCities(){
     return [

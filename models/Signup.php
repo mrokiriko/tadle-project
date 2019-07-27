@@ -25,7 +25,9 @@ class Signup extends Model
         $user = new User();
         $user->email = $this->email;
         $user->password = md5($this->password);
-        $user->date = date('Y-m-d H:i:s');
+        $user->date = date('Y-m-d G:i:s');
+        $user->avatar = getDefaultAvatar();
+
         return $user->save();
     }
 

@@ -20,7 +20,7 @@ class m190722_095037_create_ad_table extends Migration
             'city' => $this->text(),
             'description' => $this->text(),
             'headline' => $this->text(),
-            'date' => $this->date(),
+            'date' => $this->timestamp(),
             'userId' => $this->integer(),
         ]);
 
