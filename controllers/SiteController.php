@@ -3,15 +3,18 @@
 namespace app\controllers;
 
 use app\models\PhotoTable;
+use Imagine\Image\Box;
 use SebastianBergmann\Diff\TimeEfficientImplementationTest;
 use Yii;
 use yii\data\Pagination;
+use yii\db\Exception;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use app\models\AdTable;
 use app\models\UserTable;
 use app\models\Signup;
 use app\models\LoginForm;
+use yii\imagine\Image;
 use yii\web\Controller;
 use yii\web\UploadedFile;
 use yii\helpers\BaseFileHelper;
@@ -229,10 +232,16 @@ class SiteController extends Controller
     }
 
     public function actionDeleteimage($picture){
-
         $imgToDelete = PhotoTable::findOne(['picture' => $picture]);
         $picPath = Yii::getAlias('@photo') . '/' . $picture;
-        unlink($picPath);
+        $miniPicPath = Yii::getAlias('@photo') . '/m' . $picture;
+
+        if(file_exists($picPath))
+            unlink($picPath);
+
+        if(file_exists($miniPicPath))
+            unlink($miniPicPath);
+
         $imgToDelete->delete();
         if (Yii::$app->request->isAjax)
         {
@@ -240,7 +249,6 @@ class SiteController extends Controller
         } else {
             return $this->redirect(['site/index']);
         }
-
     }
 
     function actionShowimage($filename = false) {
@@ -283,11 +291,24 @@ class SiteController extends Controller
         $loginInfo = Yii::$app->user->identity;
 
         if (isset($_POST['delete-avatar']) && $_POST['delete-avatar'] != getDefaultAvatar()){
-            unlink('uploads/' . $_POST['delete-avatar']);
+
+            if(file_exists('uploads/' . $_POST['delete-avatar']))
+                unlink('uploads/' . $_POST['delete-avatar']);
+
+            if(file_exists('uploads/m' . $_POST['delete-avatar']))
+                unlink('uploads/m' . $_POST['delete-avatar']);
 
             $model = UserTable::findOne([ 'id' => Yii::$app->user->identity->getId() ]);
             $model->avatar = getDefaultAvatar();
+
             $model->saveUserData();
+
+//            if ($model->saveUserData()){
+//                debug('successful');
+//            } else {
+//                debug('very bad');
+//            }
+
         } else if (isset($_POST['UserTable'])){
             $model->attributes = Yii::$app->request->post('UserTable');
             $newAvatar = UploadedFile::getInstance($model, 'avatar');
@@ -299,13 +320,34 @@ class SiteController extends Controller
                 $model->avatar = $newAvatar;
 
                 if (isset($userModel->avatar) && $userModel->avatar != getDefaultAvatar()){
-                    unlink('uploads/' . $userModel->avatar);
+
+                    if(file_exists('uploads/' . $userModel->avatar))
+                        unlink('uploads/' . $userModel->avatar);
+
+                    if(file_exists('uploads/m' . $userModel->avatar))
+                        unlink('uploads/m' . $userModel->avatar);
+
+//                    unlink('uploads/' . $userModel->avatar);
+//                    unlink('uploads/m' . $userModel->avatar);
                 }
 
                 $randString = Yii::$app->security->generateRandomString(10);
                 $avatarFile = $loginInfo['id'] . '-avatar-' . $randString . '.jpg';
+
                 $avatarPath = 'uploads/' . $avatarFile;
                 $model->avatar->saveAs($avatarPath);
+
+                $miniAvatarPath = 'uploads/m' . $avatarFile;
+
+                try {
+                    Image::thumbnail($avatarPath, 300, 300)
+                        ->resize(new Box(300,300))
+                        ->save($miniAvatarPath,
+                            ['quality' => 70]);
+                } catch (Exception $err){
+                }
+
+
                 $model->avatar = $avatarFile;
             }
 

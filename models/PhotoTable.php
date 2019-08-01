@@ -5,7 +5,10 @@ namespace app\models;
 
 use Yii;
 use yii\db\ActiveRecord;
+use yii\db\Exception;
 use yii\web\UploadedFile;
+use yii\imagine\Image;
+use Imagine\Image\Box;
 
 class PhotoTable extends ActiveRecord
 {
@@ -47,12 +50,16 @@ class PhotoTable extends ActiveRecord
         $this->picture = UploadedFile::getInstance($this, 'picture');
 
         $picName = Yii::$app->security->generateRandomString(10) . '.' . $this->picture->getExtension();
-        $picPath = Yii::getAlias('@photo') . '/' . $picName;
+
+        $picFolder = Yii::getAlias('@photo');
+        $picPath = $picFolder . '/' . $picName;
 
         $this->date = date('Y-m-d H:i:s');
         $this->adId = $adId;
 
-        if ($this->picture->saveAs($picPath)){
+        if ($this->picture->saveAs($picPath) &&
+            $this->createPreview($picFolder, $picName)){
+
             $this->picture = $picName;
             $this->save();
             return true;
@@ -61,15 +68,37 @@ class PhotoTable extends ActiveRecord
         }
     }
 
+    public function createPreview($picFolder, $picName) {
+
+//        $newPicPath = $picPath . '-mini';
+//        $this->picture->saveAs($newPicPath);
+
+        try {
+            Image::thumbnail($picFolder . '/' . $picName, 300, 300)
+                ->resize(new Box(300,300))
+                ->save($picFolder . '/m' . $picName,
+                    ['quality' => 70]);
+        } catch (Exception $err){
+            return false;
+        }
+
+        return true;
+
+//        unlink('../files/upload/' . $this->pictureFile->baseName . '.'  . $this->pictureFile->extension);
+    }
+
     public function deleteImg(){
         try {
             $src = $this->picture;
             $imgToDelete = $this::findOne(['picture' => $src]);
             $picPath = Yii::getAlias('@photo') . '/' . $src;
             $imgToDelete->delete();
-            unlink($picPath);
+
+            if (file_exists($picPath))
+                unlink($picPath);
+
             return true;
-        } catch (\Exception $err){
+        } catch (Exception $err){
             return false;
         }
 

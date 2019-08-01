@@ -48,7 +48,7 @@ $this->title = 'TADLE - the future of public advertisement';
 
 
                 if (isset($ad->photo)){
-                    echo Html::img(Url::to(['/site/showimage', 'filename' => $ad->photo->picture]), ['style' => 'width: 100%; max-height: 300px;']);
+                    echo Html::img(Url::to(['/site/showimage', 'filename' => 'm' . $ad->photo->picture]), ['style' => 'width: 100%; max-height: 300px;']);
                 }
 
                 echo Html::tag('h2', $ad->headline, ['style' => 'color: ;']);

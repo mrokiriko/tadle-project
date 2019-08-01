@@ -32,11 +32,17 @@ class UserTable extends User
 //        }
 
         $user->avatar = $this->avatar;
+
 //        $user->avatar = $this->avatar->name;
 //
 //        debug($user);
 //        die();
 
-        return $user->save();
+        if ($user->validate()){
+            return $user->save();
+        } else {
+            return false;
+        }
+
     }
 }

@@ -21,42 +21,67 @@ class AppController extends Controller {
     }
 
 
-    public function actionDeleteimage($picture){
-
-        $imgToDelete = PhotoTable::findOne(['picture' => $picture]);
-        $picPath = Yii::getAlias('@photo') . '/' . $picture;
-        unlink($picPath);
-        $imgToDelete->delete();
-        if (Yii::$app->request->isAjax)
-        {
-            return true;
-        } else {
-            return $this->redirect(['site/index']);
-        }
-
-    }
-
     public function actionAjax(){
+        return $this->render('ajax');
+    }
 
-        $photoModel = new PhotoTable();
-        $err_msg = '';
-        $adId = 5;
+    public function actionGetProfile() {
+
+        $users = [
+            ['id' => 1, 'name' => 'Anatoly Simonov', 'log' => 'anat03', 'pass' => 'qwerty', 'token' => '1'],
+            ['id' => 2, 'name' => 'Igor Michalkov', 'log' => 'director-the-best', 'pass' => '123123', 'token' => '2'],
+            ['id' => 3, 'name' => 'Gosha Shilov', 'log' => 'gsh', 'pass' => 'cvbn', 'token' => '3'],
+            ['id' => 4, 'name' => 'Masha Neveruushaya', 'log' => 'neverland', 'pass' => '0987654321', 'token' => '4'],
+            ['id' => 5, 'name' => 'Vera Pavlovna', 'log' => 'verap', 'pass' => '132456', 'token' => '5'],
+            ['id' => 6, 'name' => 'Nadezhda Menshikova', 'log' => 'diamond-flower', 'pass' => 'kremlindont', 'token' => '6'],
+        ];
+
+        $log = Yii::$app->request->post('log');
+        $pass = Yii::$app->request->post('pass');
+
+        if (isset($log) && isset($pass)){
+
+            foreach($users as $user) {
+                if ($user['log'] == $log && $user['pass'] == $pass) {
+                    return json_encode($user);
+                }
+            }
+            return json_encode(['error'=>1, 'msg' => 'no such user', 'log' => $log, 'pass' => $pass]);
+//            return json_encode(['error'=>1, 'msg' => 'no such user', 'log' => $log, 'pass' => $pass]);
+
+        } else
+            return null;
+
+    }
+
+    public function actionDo($id = false){
+
+        $arr = [
+            ['id' => 0, 'user' => 'Igor'],
+            ['id' => 1, 'user' => 'Ivan'],
+            ['id' => 2, 'user' => 'Gosha'],
+            ['id' => 3, 'user' => 'Katy'],
+        ];
 
 
-        if (Yii::$app->request->post() && $photoModel->saveImg($adId)){
-            $err_msg = 'so very cool';
+        if ($id != false){
+            return json_encode($arr[$id]);
         } else {
-            $err_msg = 'i fucked somethign up';
+            return json_encode(null);
         }
 
-        $pictures = PhotoTable::find()->where(['adId' => $adId])->all();
 
-        return $this->render('ajax',
-            [
-                'error' => $err_msg,
-                'photoModel' => $photoModel,
-                'pictures' => $pictures,
-            ]);
+
+//        var_dump($arr);
+//        var_dump($arr);
+
+//        $_COOKIE['name'] = 'Таня';
+//
+//        $_SESSION[''];
+//
+//        return json_encode($arr);
+
     }
+
 
 }

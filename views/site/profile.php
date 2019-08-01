@@ -26,7 +26,7 @@ use yii\helpers\Html;
         }
 
         if (isset($userData['avatar'])){
-            echo Html::img(Url::to(['uploads/' . $userData['avatar']]), ['alt' => 'yo, its my avatar', 'width' => 200]);
+            echo Html::img(Url::to(['uploads/' . 'm' . $userData['avatar']]), ['alt' => 'yo, its my avatar', 'width' => 200]);
 
             if ($userData['avatar'] != getDefaultAvatar()){
                 echo Html::beginForm('', 'post');
@@ -64,7 +64,7 @@ use yii\helpers\Html;
     } else if (isset($userData)){
 
         if (isset($userData['avatar'])){
-            echo Html::img(Url::to(['uploads/' . $userData['avatar']]), ['alt' => 'yo, its my avatar', 'width' => 200]);
+            echo Html::img(Url::to(['uploads/' . 'm' . $userData['avatar']]), ['alt' => 'yo, its my avatar', 'width' => 200]);
         }
 
         echo "<h3>Profile name: ". $userData['name'] ."</h3>";
@@ -112,7 +112,7 @@ $status = ['Неактивное', 'Активное'];
 
 
         if (isset($post->photo))
-            echo Html::img(Url::to(['/site/showimage', 'filename' => $post->photo->picture]), ['style' => 'width: 100%; max-height: 300px;']);
+            echo Html::img(Url::to(['/site/showimage', 'filename' => 'm' . $post->photo->picture]), ['style' => 'width: 100%; max-height: 300px;']);
 
         echo Html::tag('h2', $post->headline, ['style' => 'color: ;']);
         echo Html::tag('p', $post->price . ' руб.', ['style' => 'font-size: 20px; font-weight: bold;']);

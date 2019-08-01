@@ -28,13 +28,16 @@ $this->params['breadcrumbs'][] = $this->title;
     $(document).ready(function(){
 
         $("img").click(function (){
+
             var modal = document.getElementById("popup-img-modal");
             if (modal.style.display != "block") {
                 modal.style.display = "block";
             } else {
                 modal.style.display = "none";
             }
-            document.getElementById("modal-img").src = this.src;
+
+            document.getElementById("modal-img").src = $(this).attr("src-full");
+            // document.getElementById("modal-img").src = this.src;
         });
 
     });
@@ -64,7 +67,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
             echo Html::beginTag('div', ['class' => 'col', 'id' => $picture->picture]);
-            echo Html::img(Url::to(['/site/showimage', 'filename' => $picture->picture]), ['style' => 'height: 200px; width: 200px;']);
+
+            echo Html::img(Url::to(['/site/showimage', 'filename' => 'm' . $picture->picture]),
+                ['src-full' => Url::to(['/site/showimage', 'filename' => $picture->picture]),
+                    'style' => 'height: 200px; width: 200px;']);
+
             echo Html::button('Удалить фото', [
                 'id' => 'link-del',
                 'onclick' => 'deleteImage("' .
@@ -118,7 +125,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
         if (isset($pictures)){
             foreach($pictures as $picture) {
-                echo "<img src=" . Url::to(['/site/showimage', 'filename' => $picture->picture]) . " style='width: 200px; max-height: 300px;'>";
+//                echo "<img src=" . Url::to(['/site/showimage', 'filename' => $picture->picture]) . " style='width: 200px; max-height: 300px;'>";
+
+                echo Html::img(Url::to(['/site/showimage', 'filename' => 'm' . $picture->picture]),
+                    ['src-full' => Url::to(['/site/showimage', 'filename' => $picture->picture]),
+                        'style' => 'height: 200px; width: 200px;']);
             }
         }
 
@@ -134,7 +145,11 @@ $this->params['breadcrumbs'][] = $this->title;
         echo Html::beginTag('div', ['class' => 'col-lg-4', 'style' => 'background: ;']);
 
         if (isset($user['avatar'])){
-            echo Html::img(Url::to(['uploads/' . $user['avatar']]), ['alt' => 'yo, its my avatar', 'width' => 200]);
+
+            echo Html::img(Url::to(['uploads/' . 'm' . $user['avatar']]),
+                ['src-full' => Url::to(['uploads/' . $user['avatar']]),
+                    'style' => 'height: 200px; width: 200px;']);
+
         }
 
         echo '<br>';
